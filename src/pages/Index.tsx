@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { Heart, ShoppingCart, Star, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Product {
   id: number;
@@ -85,7 +85,6 @@ const mockProducts: Product[] = [
 
 const Index = () => {
   const [favorites, setFavorites] = useState<number[]>([]);
-  const [showFavorites, setShowFavorites] = useState(false);
   const [cart, setCart] = useState<number[]>([]);
 
   const toggleFavorite = (productId: number) => {
@@ -207,20 +206,6 @@ const Index = () => {
             </div>
             
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                onClick={() => setShowFavorites(!showFavorites)}
-                className="relative"
-              >
-                <Heart className={`w-5 h-5 mr-2 ${favorites.length > 0 ? "fill-red-500 text-red-500" : ""}`} />
-                Favorites
-                {favorites.length > 0 && (
-                  <Badge className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 p-0 flex items-center justify-center text-xs">
-                    {favorites.length}
-                  </Badge>
-                )}
-              </Button>
-              
               <Button className="relative">
                 <ShoppingCart className="w-5 h-5 mr-2" />
                 Cart
@@ -235,113 +220,63 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="flex max-w-7xl mx-auto">
-        {/* Main Content */}
-        <main className={`flex-1 p-6 transition-all duration-300 ${showFavorites ? "mr-80" : ""}`}>
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-3xl font-bold text-gray-900">Featured Products</h2>
-              <Button variant="outline">
-                <Filter className="w-4 h-4 mr-2" />
-                Filter
-              </Button>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto p-6">
+        <Tabs defaultValue="all" className="w-full">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Our Products</h2>
+              <p className="text-gray-600">Discover our curated selection of amazing products</p>
             </div>
-            <p className="text-gray-600">Discover our curated selection of amazing products</p>
+            <Button variant="outline">
+              <Filter className="w-4 h-4 mr-2" />
+              Filter
+            </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </main>
+          <TabsList className="grid w-full max-w-md grid-cols-2 mb-8">
+            <TabsTrigger value="all" className="flex items-center gap-2">
+              All Products
+              <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                {mockProducts.length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="favorites" className="flex items-center gap-2">
+              <Heart className={`w-4 h-4 ${favorites.length > 0 ? "fill-red-500 text-red-500" : ""}`} />
+              Favorites
+              <Badge variant="secondary" className="bg-red-100 text-red-700">
+                {favorites.length}
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Favorites Sidebar */}
-        <div className={`fixed right-0 top-16 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 z-10 ${
-          showFavorites ? "translate-x-0" : "translate-x-full"
-        }`}>
-          <div className="p-6 border-b">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-900">My Favorites</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowFavorites(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ×
-              </Button>
+          <TabsContent value="all" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mockProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
             </div>
-            <p className="text-sm text-gray-600 mt-1">
-              {favorites.length} item{favorites.length !== 1 ? 's' : ''} saved
-            </p>
-          </div>
+          </TabsContent>
 
-          <div className="overflow-y-auto h-full pb-20">
+          <TabsContent value="favorites" className="mt-0">
             {favoriteProducts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 text-center">
-                <Heart className="w-12 h-12 text-gray-300 mb-4" />
-                <h4 className="text-lg font-medium text-gray-900 mb-2">No favorites yet</h4>
-                <p className="text-gray-600 text-sm">
-                  Click the heart icon on products to save them here
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <Heart className="w-16 h-16 text-gray-300 mb-4" />
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">No favorites yet</h3>
+                <p className="text-gray-600 text-lg max-w-md">
+                  Click the heart icon on products to save them to your favorites list
                 </p>
               </div>
             ) : (
-              <div className="p-4 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {favoriteProducts.map((product) => (
-                  <Card key={product.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="flex">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-20 h-20 object-cover"
-                      />
-                      <div className="flex-1 p-3">
-                        <h4 className="font-medium text-sm line-clamp-2 mb-1">
-                          {product.name}
-                        </h4>
-                        <div className="flex items-center gap-1 mb-2">
-                          {renderStars(product.rating)}
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-gray-900">
-                            ${product.price}
-                          </span>
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => toggleFavorite(product.id)}
-                              className="text-red-500 hover:text-red-600 p-1"
-                            >
-                              <Heart className="w-4 h-4 fill-current" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => addToCart(product.id)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-2"
-                            >
-                              <ShoppingCart className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </div>
             )}
-          </div>
-        </div>
-      </div>
-
-      {/* Overlay */}
-      {showFavorites && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-25 z-5"
-          onClick={() => setShowFavorites(false)}
-        />
-      )}
+          </TabsContent>
+        </Tabs>
+      </main>
     </div>
   );
 };
